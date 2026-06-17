@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const spinnerLoader = document.getElementById('spinner-loader');
   const cacheStatus = document.getElementById('cache-status');
   const btnExportCsv = document.getElementById('btn-export-csv');
+  const btnThemeToggle = document.getElementById('btn-theme-toggle');
+  const themeIconSun = document.getElementById('theme-icon-sun');
+  const themeIconMoon = document.getElementById('theme-icon-moon');
+  const themeText = document.getElementById('theme-text');
 
   // Filter Buttons
   const filterBtns = {
@@ -54,12 +58,36 @@ document.addEventListener('DOMContentLoaded', () => {
   circle.style.strokeDasharray = `${circumference} ${circumference}`;
   circle.style.strokeDashoffset = circumference;
 
+  // Initialize Saved Theme
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    themeIconSun.style.display = 'none';
+    themeIconMoon.style.display = 'inline-block';
+    themeText.textContent = 'Dark Mode';
+  }
+
   // Initialize: Fetch Notes
   fetchNotes();
 
   // Event Listeners
   btnRefresh.addEventListener('click', () => fetchNotes(true));
   btnExportCsv.addEventListener('click', exportToCSV);
+  
+  btnThemeToggle.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light-mode');
+    if (isLight) {
+      localStorage.setItem('theme', 'light');
+      themeIconSun.style.display = 'none';
+      themeIconMoon.style.display = 'inline-block';
+      themeText.textContent = 'Dark Mode';
+    } else {
+      localStorage.setItem('theme', 'dark');
+      themeIconSun.style.display = 'inline-block';
+      themeIconMoon.style.display = 'none';
+      themeText.textContent = 'Light Mode';
+    }
+  });
   searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value.toLowerCase().trim();
     renderFeed();
