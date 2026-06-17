@@ -10,6 +10,9 @@ A premium, modern web application built using **Python Flask** and **Vanilla Fro
 *   **Intelligent Classification:** Automatically badgifies releases into `Feature`, `Issue`, `Deprecation`, `Change`, and `Announcement` types.
 *   **Real-time Search & Filter:** Dynamic in-memory filters let you find specific release items by category or keyword instantly.
 *   **Built-in Caching:** Prevents server rate-limiting and boosts load performance via a 5-minute memory cache.
+*   **Theme Switcher (Dark / Light Mode):** Swaps color themes dynamically by overriding CSS root variables with a smooth transition. Saves theme preference in `localStorage` to persist selection across reloads.
+*   **Clipboard Copy Tool:** Copy the plain-text description of any release note instantly to your clipboard with one click (includes visual feedback).
+*   **CSV Export Utility:** Download the currently filtered/searched list of release notes as a formatted CSV spreadsheet file.
 *   **Social Composer Panel:**
     *   3 customizable layout templates (Short Announcement, Detailed Summary, Discussion Question).
     *   Live validation with visual circular SVG character limit countdown (max 280 characters).
@@ -43,8 +46,8 @@ agy-cli-projects/
 ├── templates/
 │   └── index.html          # Semantic HTML dashboard template
 ├── static/
-│   ├── app.js              # Client state, filter queries, SVG validations
-│   └── style.css           # Responsive dark mode styles & transitions
+│   ├── app.js              # Client state, filter queries, CSV export, clipboard copy, theme switcher
+│   └── style.css           # Responsive dark/light theme overrides & transitions
 ├── .gitignore              # Configured paths to ignore
 └── README.md               # Project documentation
 ```
