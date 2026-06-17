@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BigQuery Release Notes Tracker & Tweet Share</title>
+  <meta name="description" content="Stay up to date with BigQuery release notes and updates. Select and share the latest Google Cloud BigQuery news on Twitter instantly.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <h1>BigQuery Release Notes</h1>
+        <span>Live Tracker & Social Share</span>
+      </div>
+    </div>
+    <div class="controls">
+      <span id="cache-status" class="cache-status" title="We cache feed requests for 5 minutes to prevent rate limiting">Cached</span>
+      <button id="btn-refresh" class="btn-refresh" aria-label="Refresh release notes feed">
+        <span id="spinner-loader" class="spinner"></span>
+        <svg id="refresh-icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+          <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+        </svg>
+        <span>Refresh Feed</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Application Container -->
+  <main class="app-container">
+    
+    <!-- Sidebar with Filters -->
+    <aside class="sidebar">
+      <!-- Search Box -->
+      <div class="search-box">
+        <span class="search-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+        <input type="text" id="search-input" placeholder="Search updates..." aria-label="Search release notes">
+      </div>
+
+      <!-- Categories Filter List -->
+      <div class="filter-group">
+        <span class="filter-group-title">Filter by Type</span>
+        <button id="filter-all" class="filter-btn active" data-filter="all">
+          <span>All Updates</span>
+          <span id="count-all" class="filter-count">0</span>
+        </button>
+        <button id="filter-feature" class="filter-btn" data-filter="Feature">
+          <span>Features</span>
+          <span id="count-feature" class="filter-count">0</span>
+        </button>
+        <button id="filter-deprecation" class="filter-btn" data-filter="Deprecation">
+          <span>Deprecations</span>
+          <span id="count-deprecation" class="filter-count">0</span>
+        </button>
+        <button id="filter-issue" class="filter-btn" data-filter="Issue">
+          <span>Issues & Fixes</span>
+          <span id="count-issue" class="filter-count">0</span>
+        </button>
+        <button id="filter-change" class="filter-btn" data-filter="Change">
+          <span>Changes</span>
+          <span id="count-change" class="filter-count">0</span>
+        </button>
+        <button id="filter-announcement" class="filter-btn" data-filter="Announcement">
+          <span>Announcements</span>
+          <span id="count-announcement" class="filter-count">0</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Notes List Feed -->
+    <section class="feed-content">
+      <div class="feed-header-bar">
+        <div id="feed-title-meta" class="feed-title-meta">Showing 0 updates</div>
+      </div>
+      
+      <div id="feed-list" class="feed-list">
+        <!-- Spinner Loading State -->
+        <div class="feed-state-message">
+          <span class="spinner active" style="width: 32px; height: 32px; border-width: 3px;"></span>
+          <p>Fetching the latest release notes from Google Cloud...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Tweet Composer -->
+    <section class="composer-pane">
+      
+      <!-- Composer Placeholder State (when no update is selected) -->
+      <div id="composer-placeholder" class="composer-placeholder">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+        </svg>
+        <h3>No Update Selected</h3>
+        <p>Select any release note from the list to compose and publish a Tweet about it.</p>
+      </div>
+
+      <!-- Active Composer Panel -->
+      <div id="composer-active" class="composer-active" style="display: none;">
+        <div class="composer-title">
+          <svg viewBox="0 0 24 24">
+            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+          </svg>
+          Compose Tweet
+        </div>
+
+        <!-- Selected Note Preview Info -->
+        <div class="selected-preview">
+          <div class="selected-preview-meta">
+            <span id="selected-type" class="badge">Feature</span>
+            <span id="selected-date">June 15, 2026</span>
+          </div>
+          <div id="selected-preview-text" class="selected-preview-text">
+            Select description details display here...
+          </div>
+        </div>
+
+        <!-- Tweet Box Wrapper -->
+        <div class="tweet-box-container">
+          <label for="tweet-input" style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Customize Tweet Text</label>
+          <div class="tweet-textarea-wrapper">
+            <textarea id="tweet-input" class="tweet-textarea" placeholder="Write something about this update..."></textarea>
+          </div>
+          <div class="tweet-counter-row">
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Max 280 characters</span>
+            <div class="char-counter" id="char-counter">
+              <span id="char-num">280</span>
+              <svg class="progress-ring" width="20" height="20">
+                <circle class="progress-ring__circle" stroke-width="2" fill="transparent" r="8" cx="10" cy="10"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggestion Templates -->
+        <div class="tweet-suggestions">
+          <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Quick Templates</span>
+          <div class="suggestion-pill-row">
+            <button class="btn-suggestion" data-template-id="short">🚀 Short Announcement</button>
+            <button class="btn-suggestion" data-template-id="detailed">📝 Detail Summary</button>
+            <button class="btn-suggestion" data-template-id="question">❓ Engagement Question</button>
+          </div>
+        </div>
+
+        <!-- Tweet Button -->
+        <button id="btn-tweet" class="btn-tweet-action">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+          </svg>
+          <span>Post Tweet</span>
+        </button>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
