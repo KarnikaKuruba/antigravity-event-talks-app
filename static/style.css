@@ -463,9 +463,10 @@ header {
   margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
 
-.btn-select-action {
+.btn-select-action, .btn-copy-action {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
@@ -479,7 +480,7 @@ header {
   transition: all var(--transition-speed) ease;
 }
 
-.note-card:hover .btn-select-action {
+.note-card:hover .btn-select-action, .note-card:hover .btn-copy-action {
   border-color: rgba(255, 255, 255, 0.2);
   color: var(--text-primary);
 }
@@ -488,6 +489,12 @@ header {
   background: var(--accent-color);
   color: white;
   border-color: var(--accent-color);
+}
+
+.btn-copy-action.copied {
+  background: var(--color-feature-bg);
+  color: var(--color-feature);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 /* Right Detail Column / Tweet Composer */

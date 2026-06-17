@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const refreshIcon = document.getElementById('refresh-icon');
   const spinnerLoader = document.getElementById('spinner-loader');
   const cacheStatus = document.getElementById('cache-status');
+  const btnExportCsv = document.getElementById('btn-export-csv');
 
   // Filter Buttons
   const filterBtns = {
@@ -58,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Event Listeners
   btnRefresh.addEventListener('click', () => fetchNotes(true));
+  btnExportCsv.addEventListener('click', exportToCSV);
   searchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value.toLowerCase().trim();
     renderFeed();
@@ -244,6 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
           ${note.html}
         </div>
         <div class="note-footer">
+          <button class="btn-copy-action" aria-label="Copy update text to clipboard">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle;">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+            </svg>
+            <span>Copy</span>
+          </button>
           <button class="btn-select-action" aria-label="Select update to Tweet">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
               <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
@@ -253,10 +262,28 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
 
+      // Copy to clipboard listener
+      const copyBtn = card.querySelector('.btn-copy-action');
+      copyBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent card selection click trigger
+        navigator.clipboard.writeText(note.plain_text).then(() => {
+          copyBtn.classList.add('copied');
+          const btnSpan = copyBtn.querySelector('span');
+          const originalText = btnSpan.textContent;
+          btnSpan.textContent = 'Copied!';
+          setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            btnSpan.textContent = originalText;
+          }, 1500);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+        });
+      });
+
       // Card selection event listener
       card.addEventListener('click', (e) => {
         // Prevent click if clicking a link inside body
-        if (e.target.tagName === 'A' || e.target.closest('a')) return;
+        if (e.target.tagName === 'A' || e.target.closest('a') || e.target.closest('.btn-copy-action')) return;
         
         selectNote(note);
       });
@@ -375,5 +402,53 @@ document.addEventListener('DOMContentLoaded', () => {
   function limitString(str, length) {
     if (str.length <= length) return str;
     return str.substring(0, length - 3) + '...';
+  }
+
+  // Export currently filtered notes to CSV
+  function exportToCSV() {
+    let filteredNotes = releaseNotes;
+
+    if (activeFilter !== 'all') {
+      filteredNotes = filteredNotes.filter(note => note.type === activeFilter);
+    }
+
+    if (searchQuery) {
+      filteredNotes = filteredNotes.filter(note => 
+        note.plain_text.toLowerCase().includes(searchQuery) ||
+        note.date.toLowerCase().includes(searchQuery) ||
+        note.type.toLowerCase().includes(searchQuery)
+      );
+    }
+
+    if (filteredNotes.length === 0) {
+      alert("No notes available to export.");
+      return;
+    }
+
+    const headers = ["Date", "Type", "Description", "Link"];
+    const rows = filteredNotes.map(note => [
+      note.date,
+      note.type,
+      note.plain_text,
+      note.link
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(val => {
+        const escaped = String(val).replace(/"/g, '""');
+        return `"${escaped}"`;
+      }).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `bigquery_release_notes_${activeFilter}_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 });
